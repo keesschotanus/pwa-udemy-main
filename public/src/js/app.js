@@ -14,19 +14,15 @@ window.addEventListener('beforeinstallprompt', event => {
     return false;
 });
 
-var promise = new Promise((resolve, reject) => {
-  setTimeout(() => {
-      reject({code: 500, msg: 'An error occurred!'});
-  }, 3000);  
-});
+fetch('https://httpbin.org/ip')
+    .then(response => {
+        console.log(response);
+        return response.json()
+    })
+    .then(data => {
+        console.log(data);
+    })
+    .catch(error => {
+        console.log('Oops, something went wrong:', error);
+    });
 
-promise.then(text => {
-    console.log('text:', text);
-    return text;
-}, error => {
-    console.log(`Error# ${error.code}, Message: ${error.msg}`);
-}).then(otherText => {
-    console.log('Other text:', otherText);
-});
-
-console.log('This will be executed first!');

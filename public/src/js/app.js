@@ -1,28 +1,24 @@
+
 var deferredPrompt;
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-    .then(() => {
-        console.log('Service Worker is registered');
-    }); 
+if (!window.Promise) {
+  window.Promise = Promise;
 }
 
-window.addEventListener('beforeinstallprompt', event => {
-    console.log('beforeinstallprompt event fired');
-    event.preventDefault();
-    deferredPrompt = event;
-    return false;
-});
-
-fetch('https://httpbin.org/ip')
-    .then(response => {
-        console.log(response);
-        return response.json()
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .register('/sw.js')
+    .then(function () {
+      console.log('Service worker registered!');
     })
-    .then(data => {
-        console.log(data);
-    })
-    .catch(error => {
-        console.log('Oops, something went wrong:', error);
+    .catch(function(err) {
+      console.log(err);
     });
+}
 
+window.addEventListener('beforeinstallprompt', function(event) {
+  console.log('beforeinstallprompt fired');
+  event.preventDefault();
+  deferredPrompt = event;
+  return false;
+});

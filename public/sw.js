@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-var CACHE_STATIC_NAME = 'static-v18';
+var CACHE_STATIC_NAME = 'static-v19';
 var CACHE_DYNAMIC_NAME = 'dynamic-v2';
 var STATIC_FILES = [
   '/',
@@ -180,3 +180,41 @@ self.addEventListener('fetch', function (event) {
 //     fetch(event.request)
 //   );
 // });
+
+self.addEventListener('sync', event => {
+  console.log('[Service Worker] Background syncing', event);
+  if (event.tag === 'sync-new-posts') {
+    console.log('[Service Worker] Syncing new posts', event);
+    event.waitUntil(
+      readAllData('sync-posts')
+        .then(data => {
+          for (var dt of data) {
+            fetch('hhttps://us-central1-udemy-pwa-bc405.cloudfunctions.net/storePostData', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify({
+                id: dt.id,
+                title: dt.title,
+                location: dt.location
+              })
+            })
+            .then(res => {
+              console.log('Sent data', res);
+              if (res.ok) {
+                res.json()
+                  .then(resData => {
+                    deleteItemFromData('sync-posts', resData.id)
+                  })
+              }
+            })
+            .catch(err => {
+              console.log('Error while sending data', err);
+            })
+          }
+        })
+    )
+  }
+})

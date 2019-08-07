@@ -3,8 +3,15 @@ var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
 
+var form = document.querySelector('form');
+var titleInput = document.querySelector('#title');
+var locationInput = document.querySelector('#location');
+
+
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
+  setTimeout(() => { createPostArea.style.transform = 'translateY(0)';}, 1);
+  
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
@@ -32,7 +39,7 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.display = 'none';
+  createPostArea.style.transform = 'translateY(100vh)';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
@@ -64,7 +71,6 @@ function createCard(data) {
   cardTitle.className = 'mdl-card__title';
   cardTitle.style.backgroundImage = 'url(' + data.image + ')';
   cardTitle.style.backgroundSize = 'cover';
-  cardTitle.style.height = '180px';
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.style.color = 'white';
@@ -116,4 +122,60 @@ if ('indexedDB' in window) {
         updateUI(data);
       }
     });
+}
+
+form.addEventListener('submit', event => {
+  event.preventDefault();
+
+  if (titleInput.value.trim() === '' || locationInput.value.trim() === '') {
+    alert('Please add valid data');
+    return;
+  }
+
+  closeCreatePostModal();
+
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready
+      .then(sw => {
+        var post = {
+          id: new Date().toISOString(),
+          title: titleInput.value,
+          location: locationInput.value
+        };
+
+        writeData('sync-posts', post)
+          .then(() => {
+            return sw.sync.register('sync-new-posts');
+          })
+          .then(() => {
+            var snackbarContainer = document.querySelector('#confirmation-toast');
+            var data = {message: 'Your Post was saved for syncing!'};
+            snackbarContainer.MaterialSnackbar.showSnackbar(data);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      });
+  } else {
+    sendData();
+  }
+});
+
+function sendData() {
+  fetch('https://us-central1-udemy-pwa-bc405.cloudfunctions.net/storePostData', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      id: new Date().toISOString(),
+      title: titleInput.value,
+      location: locationInput.value
+    })
+  })
+  .then(res => {
+    console.log('Sent data', res);
+    updateUI();
+  })
 }

@@ -29,14 +29,15 @@ function displayConfirmNotification() {
     const options = {
       body: 'You successfully subscribed to our service!',
       icon: '/src/images/icons/app-icon-96x96.png',
+      image: '/src/images/sf-boat.jpg',
+      vibrate: [100, 50, 200],
+      badge: '/src/images/icons/app-icon-96x96.png',
+      tag: 'confirm-notification',
+      renotify: true,
       actions: [
         { action: 'confirm', title: 'Okay', icon: '/src/image/icons/app-icon-96x96.png' },
         { action: 'cancel', title: 'Cancel', icon: '/src/image/icons/app-icon-96x96.png' },
       ],
-      vibrate: [100, 50, 200],
-      badge: '/src/images/icons/app-icon-96x96.png',
-      tag: 'confirm-notification',
-      renotify: true
     };
 
     navigator.serviceWorker.ready
@@ -45,19 +46,11 @@ function displayConfirmNotification() {
       })
   }
 }
-
-function askForNotificationPermission() {
-  Notification.requestPermission(result => {
-    console.log('User Choice', result);
-    if (result !== 'granted') {
-      console.log('User did not grant permission');
-    } else {
-      configurePushSub();
-    }
-  });
-}
-
 function configurePushSub() {
+  if (!('serviceWorker' in navigator)) {
+    return;
+  }
+
   var reg;
   navigator.serviceWorker.ready
     .then(swreg => {
@@ -73,7 +66,7 @@ function configurePushSub() {
         var convertedVapidPublicKey = urlBase64ToUint8Array(vapidPublicKey);
         return reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: convertedVapidPublicKey          
+          applicationServerKey: convertedVapidPublicKey
         });
       }
     })
@@ -97,6 +90,18 @@ function configurePushSub() {
       console.log(err);
     })
 }
+
+function askForNotificationPermission() {
+  Notification.requestPermission(result => {
+    console.log('User Choice', result);
+    if (result !== 'granted') {
+      console.log('User did not grant permission');
+    } else {
+      configurePushSub();
+    }
+  });
+}
+
 
 if ('Notification' in window && 'serviceWorker' in navigator) {
   for (var i = 0; i < enableNotificationsButtons.length; ++i) {

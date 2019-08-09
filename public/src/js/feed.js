@@ -2,15 +2,13 @@ var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
-
 var form = document.querySelector('form');
 var titleInput = document.querySelector('#title');
 var locationInput = document.querySelector('#location');
 
 
 function openCreatePostModal() {
-  createPostArea.style.display = 'block';
-  setTimeout(() => { createPostArea.style.transform = 'translateY(0)';}, 1);
+  createPostArea.style.transform = 'translateY(0)';}, 1);
   
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -124,6 +122,26 @@ if ('indexedDB' in window) {
     });
 }
 
+function sendData() {
+  fetch('https://us-central1-udemy-pwa-bc405.cloudfunctions.net/storePostData', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      id: new Date().toISOString(),
+      title: titleInput.value,
+      location: locationInput.value,
+      image: 'https://firebasestorage.googleapis.com/v0/b/udemy-pwa-bc405.appspot.com/o/sf-boat.jpg?alt=media&token=c50f95a1-557f-481f-9e01-620d07904def'
+    })
+  })
+    .then(res => {
+      console.log('Sent data', res);
+      updateUI();
+    })
+}
+
 form.addEventListener('submit', event => {
   event.preventDefault();
 
@@ -161,21 +179,3 @@ form.addEventListener('submit', event => {
   }
 });
 
-function sendData() {
-  fetch('https://us-central1-udemy-pwa-bc405.cloudfunctions.net/storePostData', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify({
-      id: new Date().toISOString(),
-      title: titleInput.value,
-      location: locationInput.value
-    })
-  })
-  .then(res => {
-    console.log('Sent data', res);
-    updateUI();
-  })
-}

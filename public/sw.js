@@ -198,7 +198,8 @@ self.addEventListener('sync', event => {
               body: JSON.stringify({
                 id: dt.id,
                 title: dt.title,
-                location: dt.location
+                location: dt.location,
+                image: '"https://firebasestorage.googleapis.com/v0/b/udemy-pwa-bc405.appspot.com/o/sf-boat.jpg?alt=media&token=c50f95a1-557f-481f-9e01-620d07904def"'
               })
             })
             .then(res => {
@@ -229,6 +230,7 @@ self.addEventListener('notificationClick', event => {
     notification.close();
   } else {
     console.log(action);
+    notification.close();
   }
 })
 

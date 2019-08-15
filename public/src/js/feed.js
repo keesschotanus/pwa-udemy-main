@@ -8,7 +8,7 @@ var locationInput = document.querySelector('#location');
 
 
 function openCreatePostModal() {
-  createPostArea.style.transform = 'translateY(0)';}, 1);
+  createPostArea.style.transform = 'translateY(0)';
   
   if (deferredPrompt) {
     deferredPrompt.prompt();

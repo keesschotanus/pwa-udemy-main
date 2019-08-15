@@ -21,7 +21,7 @@ exports.storePostData = functions.https.onRequest((request, response) => {
       webpush.setVapidDetails(
         'mailto:kees.schotanus@planet.nl',
         'pubBGKUmnOytLjQkNUJvI6tGPY1KmuJ5JG5J2yPO8KWhouDaVe2nxDR1d3oV0J62jPTzpyrLn7ehx667PQ3VDCP1VYkey',
-        'private key');
+        'mvewgDDdG82wnzK8mdXB9D-TjPOxr1tNVesMnWu0cwA');
       return admin.database().ref('subscriptions').once('value');
     })
     .then((subscriptions: any) => {

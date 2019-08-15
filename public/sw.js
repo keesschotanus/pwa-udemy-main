@@ -250,7 +250,7 @@ self.addEventListener('push', event => {
   }
 
   var options = {
-    body: data.content;
+    body: data.content,
     icon: '/src/images/icons/app-icon-96x96.png',
     badge: '/src/images/icons/app-icon-96x96.png'
   };

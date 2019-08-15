@@ -189,7 +189,7 @@ self.addEventListener('sync', event => {
       readAllData('sync-posts')
         .then(data => {
           for (var dt of data) {
-            fetch('hhttps://us-central1-udemy-pwa-bc405.cloudfunctions.net/storePostData', {
+            fetch('https://us-central1-udemy-pwa-bc405.cloudfunctions.net/storePostData', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -230,7 +230,21 @@ self.addEventListener('notificationClick', event => {
     notification.close();
   } else {
     console.log(action);
-    notification.close();
+    event.waitUntil(clients.matchAll()
+      .then(clis => {
+        var client = clis.find(c => {
+          return c.visibilitySate === 'visible';
+        });
+
+        if (client) {
+          client.navigate('http://localhost:8080');
+          client.focus();
+        } else {
+          clients.openWindow('http://localhost:8080');
+        }
+        notification.close();
+      })
+    );
   }
 })
 

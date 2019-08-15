@@ -95,7 +95,7 @@ function updateUI(data) {
   }
 }
 
-var url = 'https://pwagram-99adf.firebaseio.com/posts.json';
+var url = 'https://udemy-pwa-bc405.firebaseio.com/posts.json';        
 var networkDataReceived = false;
 
 fetch(url)

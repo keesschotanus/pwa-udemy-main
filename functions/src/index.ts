@@ -1,3 +1,6 @@
+// To upload to firebase, execute: npx firebase deploy
+// Change reading of the json file to adding the json file directly!
+
 import * as functions from 'firebase-functions';
 const admin = require('firebase-admin');
 const cors = require('cors')({origin: true});

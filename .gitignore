@@ -2,3 +2,4 @@
 node_modules
 functions/src/udemy-pwa-firebase.json
 .firebase
+functions/firebase-debug.log

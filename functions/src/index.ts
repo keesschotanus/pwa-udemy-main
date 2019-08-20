@@ -1,5 +1,7 @@
-// To upload to firebase, execute: npx firebase deploy
-// Changed reading of the json file to adding the json file directly!
+// To upload to firebase:
+// 1) Copy the content of udemy-pwa-firebase.json
+// 2) Paste it as the assignment to serviceAccount
+// 3) execute: npx firebase deploy (from the functions directory)
 
 import * as functions from 'firebase-functions';
 const admin = require('firebase-admin');

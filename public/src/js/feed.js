@@ -5,10 +5,112 @@ var sharedMomentsArea = document.querySelector('#shared-moments');
 var form = document.querySelector('form');
 var titleInput = document.querySelector('#title');
 var locationInput = document.querySelector('#location');
+var videoPlayer = document.querySelector('#player')
+var canvasElement = document.querySelector('#canvas');
+var captureButton = document.querySelector('#capture-btn');
+var imagePicker = document.querySelector('#image-picker');
+var imagePickerArea = document.querySelector('#pick-image');
+var picture;
+var locationBtn = document.querySelector('#location-btn');
+var locationLoader = document.querySelector('#location-loader');
+var fetchedLocation = {lat: 0, lng: 0};
 
+locationBtn.addEventListener('click', event => {
+
+  let sawAlert = false;
+
+  locationBtn.style.display = 'none';
+  locationLoader.style.display ='block';
+
+  navigator.getCurrentPosition(
+    position => {
+      locationBtn.style.display = 'inline';
+      locationLoader.style.display = 'none';
+      fetchedLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+      locationInput.value = 'In Amersfoort';
+      document.querySelector('#manual-location').classList.add('is-focused');
+    },
+    err => {
+      console.log(err);
+      locationBtn.style.display = 'inline';
+      locationLoader.style.display = 'none';
+      if (!sawAlert) {
+        alert('Could not determine location');
+        sawAlert = true;
+      }
+      fetchedLocation = {lat: 0, lng: 0};
+    }, {
+      timeout: 7000
+    })
+});
+
+function initializeLocation() {
+  if (!('geolocation' in navigator)) {
+    locationBtn.style.display = 'none';
+  }
+}
+
+function initializeMedia() {
+  if (!('mediadevices' in navigator)) {
+    navigator.mediaDevices = {};
+  }
+
+  if (!('getUserMedia' in navigator.mediaDevices)) {
+    navigator.mediaDevices.getUserMedia = constraints => {
+      var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+      if (!getUserMedia) {
+        return Promise.reject(new Error('getUserMedia is not implemented'));
+      }
+
+      return new Promise((resolve, reject) => {
+        getUserMedia.call(navigator, constraints, resolve, reject);
+      });
+    }
+  }
+
+  navigator.mediaDevices.getUserMedia({
+    video: true
+  })
+  .then(stream => {
+    videoPlayer.srcObject = stream;
+    videoPlayer.style.display = 'block';
+  })
+  .catch(err => {
+    imagePickerArea.style.display = 'block';
+  });
+
+}
+
+captureButton.addEventListener('click', event => {
+  // Show canvas and hide video
+  canvasElement.style.display = 'block';
+  videoPlayer.style.display = 'none';
+  captureButton.style.display = 'none';
+  const context = canvasElement.getContext('2d');
+  // Maintain aspect ration
+  context.drawImage(videoPlayer, 0, 0, canvas.width, videoPlayer.videoHeight / (videoPlayer.videoWidth / canvas.width));
+  
+  // Stop the still playing video
+  videoPlayer.srcObject.getVideoTracks().forEach(track => {
+    track.stop();
+  })
+  picture = dataURItoBlob(canvasElement.toDataURL());
+});
+
+imagePicker.addEventListener('change', event => {
+  picture = event.target.files[0];
+});
 
 function openCreatePostModal() {
-  createPostArea.style.transform = 'translateY(0)';
+  setTimeout(() => {
+    createPostArea.style.transform = 'translateY(0)';
+  }, 1);
+  initializeMedia();
+  initializeLocation();
   
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -37,7 +139,21 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.transform = 'translateY(100vh)';
+  imagePickerArea.style.display = 'none';
+  videoPlayer.style.display = 'none';
+  canvasElement.style.display = 'none';
+  locationBtn.style.display = 'inline';
+  locationLoader.style.display = 'none';
+  captureButton.style.display = 'inline';
+  if (videoPlayer.srcObject) {
+    videoPlayer.srcObject.getVideoTracks().forEach(track => {
+      track.stop();
+    });
+  }
+
+  setTimeout(() => {
+    createPostArea.style.transform = 'translateY(100vh)';
+  }, 1);
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
@@ -123,23 +239,23 @@ if ('indexedDB' in window) {
 }
 
 function sendData() {
+  var id = new Date().toISOString();
+  var postData = new FormData();
+  postData.append('id', id);
+  postData.append('title', titleInput.value);
+  postData.append('location', locationInput.value);
+  postData.append('rawLocationLat', fetchedLocation.lat);
+  postData.append('rawLocationLng', fetchedLocation.lng);
+  postData.append('file', picture, id + '.png');
+
   fetch('https://us-central1-udemy-pwa-bc405.cloudfunctions.net/storePostData', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify({
-      id: new Date().toISOString(),
-      title: titleInput.value,
-      location: locationInput.value,
-      image: 'https://firebasestorage.googleapis.com/v0/b/udemy-pwa-bc405.appspot.com/o/sf-boat.jpg?alt=media&token=c50f95a1-557f-481f-9e01-620d07904def'
-    })
+    body: postData
   })
-    .then(res => {
-      console.log('Sent data', res);
-      updateUI();
-    })
+  .then(res => {
+    console.log('Sent data', res);
+    updateUI();
+  })
 }
 
 form.addEventListener('submit', event => {
@@ -158,7 +274,9 @@ form.addEventListener('submit', event => {
         var post = {
           id: new Date().toISOString(),
           title: titleInput.value,
-          location: locationInput.value
+          location: locationInput.value,
+          picture: picture,
+          rawLocation: fetchedLocation
         };
 
         writeData('sync-posts', post)

@@ -25,5 +25,6 @@
     "@types/web-push": "^3.3.0",
     "firebase-tools": "^8.0.2",
     "web-push": "^3.4.3"
+    "dot-prop": ">=5.1.1"
   }
 }

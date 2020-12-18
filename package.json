@@ -18,13 +18,13 @@
   "author": "Maximilian Schwarzmüller",
   "license": "ISC",
   "devDependencies": {
-    "http-server": "^0.12.1"
+    "http-server": "^0.12.3"
   },
   "dependencies": {
-    "@types/node": "^12.7.2",
+    "@types/node": "^12.19.9",
     "@types/web-push": "^3.3.0",
-    "firebase-tools": "^8.0.2",
-    "web-push": "^3.4.3"
-    "dot-prop": ">=5.1.1"
+    "dot-prop": "^6.0.1",
+    "firebase-tools": "^9.0.1",
+    "web-push": "^3.4.4"
   }
 }

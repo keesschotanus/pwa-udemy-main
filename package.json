@@ -24,7 +24,7 @@
     "@types/node": "^12.19.9",
     "@types/web-push": "^3.3.0",
     "dot-prop": "^6.0.1",
-    "firebase-tools": "^9.0.1",
+    "firebase-tools": "^11.22.0",
     "web-push": "^3.4.4"
   }
 }
